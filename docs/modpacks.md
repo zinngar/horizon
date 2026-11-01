@@ -292,7 +292,8 @@ How the game loads them, without touching vanilla's path:
   missing model, the recipe is absent, everything else loads. Vanilla's own files never hit
   these paths.
 - Not in 0.2: multiplayer registry sync (single player and the integrated server first), worlds
-  opened without a mod they used (vanilla turns unknown blocks into air; we will ask first),
+  opened without a mod they used (vanilla turns unknown blocks into air; we will ask first;
+  `horizon-port-pack convert-world` converts such a world ahead of time, [world-convert.md](world-convert.md)),
   vanilla ids redefined by a mod (refused).
 
 ## The pipeline: `horizon-port-pack`

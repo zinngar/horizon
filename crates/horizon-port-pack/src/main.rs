@@ -29,16 +29,20 @@
 //!   (zip or folder) with its world generation rewritten in 26.3's formats
 //!   (`docs/datapack-upgrade.md`), into the folder `<out>`, or into
 //!   `<world>/datapacks/<pack name>-26.3`.
+//! - `convert-world <world> <out> [--mods <folder>] [--mods-out <folder>]
+//!   [--remap <toml>]`: a Java world played with mods, copied to `<out>` so
+//!   it opens in Horizon: the mods in `<folder>` converted, and every
+//!   modded id they don't bring remapped or removed (`docs/world-convert.md`).
 //!
 //! The work folder belongs to the user: jars and carried-over files stay
 //! there and are never uploaded or committed.
-use horizon_port_pack::{fetch, inventory::Record, pipeline, upgrade};
+use horizon_port_pack::{fetch, inventory::Record, pipeline, upgrade, world};
 use std::{
     path::{Path, PathBuf},
     process::ExitCode,
 };
 
-const USAGE: &str = "usage: horizon-port-pack import <pack> <work> | inventory <work> [--offline] | fetch <work> [--from <folder>] [<mod id>...] | carry <work> [--resources <prepared>] [<mod id>...] | report <work> | check <jar> <out> | port <pack> <work> [--from <folder>] [--resources <prepared>] | upgrade-datapack <pack> (<out> | --world <world>)";
+const USAGE: &str = "usage: horizon-port-pack import <pack> <work> | inventory <work> [--offline] | fetch <work> [--from <folder>] [<mod id>...] | carry <work> [--resources <prepared>] [<mod id>...] | report <work> | check <jar> <out> | port <pack> <work> [--from <folder>] [--resources <prepared>] | upgrade-datapack <pack> (<out> | --world <world>) | convert-world <world> <out> [--mods <folder>] [--mods-out <folder>] [--remap <toml>]";
 
 fn main() -> ExitCode {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
@@ -46,6 +50,9 @@ fn main() -> ExitCode {
         let from = option(&mut args, "--from")?;
         let resources = option(&mut args, "--resources")?;
         let world = option(&mut args, "--world")?;
+        let mods = option(&mut args, "--mods")?;
+        let mods_out = option(&mut args, "--mods-out")?;
+        let remap = option(&mut args, "--remap")?;
         let offline = take_flag(&mut args, "--offline");
         let path = |i: usize| args.get(i).map(Path::new).ok_or(USAGE.to_owned());
         let rest = || args.get(2..).unwrap_or_default().to_vec();
@@ -108,6 +115,35 @@ fn main() -> ExitCode {
                     println!("{line}");
                 }
                 println!("{}", out.display());
+                Ok(())
+            }
+            Some("convert-world") => {
+                let out = path(2)?;
+                let options = world::Options {
+                    world: path(1)?,
+                    out,
+                    mods: mods.as_deref(),
+                    mods_out: mods_out.as_deref(),
+                    remap: remap.as_deref(),
+                };
+                let summary = world::convert(&options, log)?;
+                let count = |became: fn(&str) -> bool| {
+                    summary
+                        .ledger
+                        .values()
+                        .filter(|s| became(&s.became))
+                        .count()
+                };
+                println!(
+                    "{} modded ids kept, {} remapped, {} removed",
+                    count(|b| b == "kept"),
+                    count(|b| b != "kept" && b != "removed"),
+                    count(|b| b == "removed"),
+                );
+                if let Some(folder) = &summary.mods_folder {
+                    println!("converted mods: {}", folder.display());
+                }
+                println!("{}", out.join("horizon-convert-report.md").display());
                 Ok(())
             }
             _ => Err(USAGE.to_owned()),

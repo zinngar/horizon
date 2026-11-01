@@ -9,6 +9,8 @@ description = "Port a Java modpack to Horizon: import, inventory, classification
 [dependencies]
 # Content path rules only (no runtime): what the game's content loader accepts.
 horizon-mods = { path = "../horizon-mods", default-features = false }
+# Reading and writing saved worlds (convert-world): NBT, regions, compression.
+horizon-world = { path = "../horizon-world" }
 serde = { version = "1", features = ["derive"] }
 # Exact float parsing: the upgrade writes back the numbers it read (data pack
 # upgrade), and Java reads them exactly.
@@ -17,6 +19,9 @@ sha1 = "0.10"
 toml = "1.1.6"
 ureq = { version = "2", default-features = false, features = ["tls"] }
 zip = { version = "9.1.3", default-features = false, features = ["deflate"] }
+
+[dev-dependencies]
+horizon-core = { path = "../horizon-core" }
 
 [lints]
 workspace = true
