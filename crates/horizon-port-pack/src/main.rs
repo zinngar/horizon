@@ -141,6 +141,7 @@ fn main() -> ExitCode {
                     mods: mods.as_deref(),
                     mods_out: mods_out.as_deref(),
                     remap: remap.as_deref(),
+                    converted: None,
                 };
                 let summary = world::convert(&options, log)?;
                 let count = |became: fn(&str) -> bool| {

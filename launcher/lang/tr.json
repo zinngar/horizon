@@ -651,5 +651,20 @@
   "Could not read the saved sign-in.": "Kaydedilen oturum okunamadı.",
   "Could not save the renewed sign-in.": "Yenilenen oturum kaydedilemedi.",
   "The renewed sign-in could not be saved in the keychain. Unlock it and retry.": "Yenilenen oturum anahtar zincirine kaydedilemedi. Kilidini açıp tekrar deneyin.",
-  "Another account operation is running. Try again in a moment.": "Başka bir hesap işlemi sürüyor. Birazdan tekrar deneyin."
+  "Another account operation is running. Try again in a moment.": "Başka bir hesap işlemi sürüyor. Birazdan tekrar deneyin.",
+  "Bring your Java mods and worlds to Horizon. Blocks, items, recipes and world generation carry over; what a mod does in Java code doesn't. A world's modded blocks its mods don't bring become vanilla ones. Nothing is changed where they come from.": "Java modlarını ve dünyalarını Horizon'a getir. Bloklar, eşyalar, tarifler ve dünya oluşturma aktarılır; bir modun Java koduyla yaptıkları aktarılmaz. Bir dünyanın, modlarının getirmediği modlu blokları vanilla bloklara dönüşür. Kaynakta hiçbir şey değişmez.",
+  "Convert": "Dönüştür",
+  "From Java Edition": "Java Edition'dan",
+  "In your other launchers": "Diğer başlatıcılarında",
+  "Nothing Horizon can use was found.": "Horizon'un kullanabileceği bir şey bulunamadı.",
+  "{n} mod already there": "{n} mod zaten var",
+  "{n} mod installed": "{n} mod yüklendi",
+  "{n} mods already there": "{n} mod zaten var",
+  "{n} mods installed": "{n} mod yüklendi",
+  "{n} world converted": "{n} dünya dönüştürüldü",
+  "{n} worlds converted": "{n} dünya dönüştürüldü",
+  "Convert a mods folder…": "Bir mod klasörünü dönüştür…",
+  "Convert a Java world…": "Bir Java dünyasını dönüştür…",
+  "Open reports": "Raporları aç",
+  "Bring to Horizon": "Horizon'a getir"
 }

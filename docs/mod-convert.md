@@ -2,7 +2,12 @@
 
 Java mod jars don't run in Horizon, but the content inside many of them does: blocks, items, recipes, loot,
 tags, world generation, textures and models. `horizon-port-pack convert-mods` takes a launcher's mods folder
-and makes Horizon mods of every jar that has content:
+and makes Horizon mods of every jar that has content. In the launcher, the same is on the Mods page's Mods tab
+under **From Java Edition** (a Horizon instance selected): **Convert a mods folder…**, **Convert a Java world…**
+(a world in a game folder's `saves/` brings that folder's `mods/` along), and **Bring to Horizon** for each
+instance another launcher keeps (its mods, then every world). The launcher installs what runs into the instance's
+`horizon-mods/`, turns it on, and keeps the reports in `conversions/<time>/` in its game folder; its commands are
+`horizon-launcher mods convert`, `worlds convert` and `instance bring` ([launcher-commands.md](launcher-commands.md)).
 
 ```sh
 cargo run --release -p horizon-port-pack -- convert-mods ~/.minecraft/mods ~/Desktop/converted-mods

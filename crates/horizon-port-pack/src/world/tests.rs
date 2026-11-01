@@ -351,6 +351,7 @@ fn converts_a_world_folder_with_a_folder_mod() {
         mods: Some(&mods),
         mods_out: None,
         remap: None,
+        converted: None,
     };
     let summary = convert(&options, &|_| {}).unwrap();
     assert_eq!((summary.chunks, summary.changed), (1, 1));
@@ -430,6 +431,7 @@ fn refuses_forge_worlds_from_before_the_flattening() {
         mods: None,
         mods_out: None,
         remap: None,
+        converted: None,
     };
     let e = convert(&options, &|_| {}).unwrap_err();
     assert!(e.contains("before Minecraft 1.13"), "{e}");

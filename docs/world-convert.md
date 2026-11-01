@@ -3,7 +3,8 @@
 Horizon opens vanilla Java worlds from 1.8 on and upgrades them as it loads them. A world played with
 Forge, NeoForge or Fabric mods holds blocks, items, biomes and entities that only those mods define:
 vanilla turns unknown blocks into air, so a modded world opened as it is loses them. `horizon-port-pack
-convert-world` makes a copy that opens in Horizon:
+convert-world` makes a copy that opens in Horizon. The launcher does it too: **Convert a Java world…** and
+**Bring to Horizon** on the Mods page ([mod-convert.md](mod-convert.md)), or `horizon-launcher worlds convert`:
 
 ```sh
 cargo run --release -p horizon-port-pack -- convert-world \

@@ -363,6 +363,19 @@ enum InstanceCmd {
         #[arg(long)]
         folder: Option<PathBuf>,
     },
+    /// Bring another launcher's instance to a Horizon instance: its mods converted and turned
+    /// on, each of its worlds converted into a new world (docs/mod-convert.md,
+    /// docs/world-convert.md); the other launcher's copy stays as it is
+    Bring {
+        /// Its name, as `instance others` lists it
+        name: String,
+        /// Look in this folder instead: a launcher's folder, its instances/ or one instance
+        #[arg(long)]
+        folder: Option<PathBuf>,
+        /// The Horizon instance it goes into (default: the selected one)
+        #[arg(long)]
+        into: Option<String>,
+    },
     /// Copy another launcher's instance into a new Java instance: its Minecraft version and its
     /// game folder (worlds, mods, packs, options); the other launcher's copy stays as it is
     CopyFrom {
@@ -413,6 +426,17 @@ enum WorldsCmd {
     /// Move a world to the system's trash
     Delete {
         world: String,
+        #[arg(long)]
+        instance: Option<String>,
+    },
+    /// Convert a Java world into a new world of a Horizon instance: modded blocks, items and
+    /// biomes kept when their mod converts, else remapped or removed (docs/world-convert.md)
+    Convert {
+        /// The world's folder (the one holding level.dat)
+        world: PathBuf,
+        /// The mods folder it was played with: converted and turned on first
+        #[arg(long)]
+        mods: Option<PathBuf>,
         #[arg(long)]
         instance: Option<String>,
     },
@@ -546,6 +570,14 @@ enum ModsCmd {
     /// What the browser installed in an instance (the default)
     List {
         /// The instance (default: the selected one)
+        #[arg(long)]
+        instance: Option<String>,
+    },
+    /// Convert a folder of Java mod jars (a launcher's mods/) and turn on what runs in Horizon
+    /// (docs/mod-convert.md)
+    Convert {
+        folder: PathBuf,
+        /// The Horizon instance (default: the selected one)
         #[arg(long)]
         instance: Option<String>,
     },
@@ -2204,6 +2236,16 @@ fn github_native(
 fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
     use horizon_launcher::browser::{horizon, installed, java_instance, Kind, Query, SourceId};
     use horizon_launcher::modpacks;
+    let action = match action {
+        ModsCmd::Convert { folder, instance } => {
+            let home = horizon_home(instance)?;
+            let log = |line: String| eprintln!("{line}");
+            let done = horizon_launcher::conversions::mods(&folder, &home, &log)?;
+            print_conversion(&done, as_json);
+            return Ok(());
+        }
+        other => other,
+    };
     // What the browser installs goes into an instance's game folder; Java mods' checks are kept
     // in the default one, shared by all.
     let instance = match &action {
@@ -2219,7 +2261,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
             Some(name) => Some(instances::find(name)?),
             None => Some(instances::selected()),
         },
-        ModsCmd::Check { .. } => None,
+        ModsCmd::Check { .. } | ModsCmd::Convert { .. } => None,
     };
     // A Java instance gets the source's own files, for its version and loader.
     let java = instance
@@ -2245,6 +2287,7 @@ fn mods(action: ModsCmd, as_json: bool) -> Result<(), String> {
     }
     let on = matches!(action, ModsCmd::Enable { .. });
     match action {
+        ModsCmd::Convert { .. } => unreachable!("converted above"),
         ModsCmd::List { .. } => {
             let list = installed::Installed::load(&home).entries;
             if as_json {
@@ -2656,6 +2699,62 @@ fn other_instances(folder: Option<&Path>) -> Result<Vec<other_launchers::Found>,
     })
 }
 
+/// The one instance called `name` other launchers keep.
+fn other_named(name: &str, folder: Option<&Path>) -> Result<other_launchers::Found, String> {
+    let found = other_instances(folder)?;
+    let matching: Vec<_> = found.into_iter().filter(|f| f.name == name).collect();
+    match <[_; 1]>::try_from(matching) {
+        Ok([one]) => Ok(one),
+        Err(v) if v.is_empty() => Err(format!(
+            "No other launcher has an instance called {name}: horizon-launcher instance others"
+        )),
+        Err(_) => Err(format!(
+            "More than one launcher has an instance called {name}: say which with --folder."
+        )),
+    }
+}
+
+/// The game folder of a Horizon instance (default: the selected one); a Java instance plays
+/// Java mods itself, so nothing is converted into it.
+fn horizon_home(instance: Option<String>) -> Result<PathBuf, String> {
+    let i = match instance {
+        Some(name) => instances::find(&name)?,
+        None => instances::selected(),
+    };
+    match i.java {
+        None => Ok(i.home),
+        Some(_) => Err(format!(
+            "{} is a Java Edition instance: pick a Horizon instance with --instance.",
+            i.name
+        )),
+    }
+}
+
+/// What a conversion did, as the commands print it.
+fn print_conversion(done: &horizon_launcher::conversions::Done, as_json: bool) {
+    if as_json {
+        json(serde_json::json!({
+            "mods": done.mods, "kept": done.kept, "worlds": done.worlds,
+            "notes": done.notes, "work": done.work,
+        }));
+        return;
+    }
+    println!("{}", done.summary());
+    for id in &done.mods {
+        println!("  mod on: {id}");
+    }
+    for id in &done.kept {
+        println!("  mod already there, left as it is: {id}");
+    }
+    for w in &done.worlds {
+        println!("  world: {w}");
+    }
+    for note in &done.notes {
+        println!("  {note}");
+    }
+    println!("Reports: {}", done.work.display());
+}
+
 fn other_plays(f: &other_launchers::Found) -> String {
     match (&f.minecraft, &f.loader) {
         (None, _) => "Minecraft version not recorded: copy-from --minecraft <version>".into(),
@@ -3021,29 +3120,20 @@ fn instance(action: InstanceCmd, as_json: bool) -> Result<(), String> {
                 );
             }
         }
+        InstanceCmd::Bring { name, folder, into } => {
+            let f = other_named(&name, folder.as_deref())?;
+            let home = horizon_home(into)?;
+            let log = |line: String| eprintln!("{line}");
+            let done = horizon_launcher::conversions::instance(&f, &home, &log)?;
+            print_conversion(&done, as_json);
+        }
         InstanceCmd::CopyFrom {
             name,
             folder,
             new_name,
             minecraft,
         } => {
-            let found = other_instances(folder.as_deref())?;
-            let matching: Vec<_> = found.iter().filter(|f| f.name == name).collect();
-            let f = match matching[..] {
-                [one] => one,
-                [] => {
-                    return Err(format!(
-                        "No other launcher has an instance called {name}: \
-                         horizon-launcher instance others"
-                    ))
-                }
-                _ => {
-                    return Err(format!(
-                        "More than one launcher has an instance called {name}: say which \
-                         with --folder."
-                    ))
-                }
-            };
+            let f = &other_named(&name, folder.as_deref())?;
             let made = other_launchers::import(
                 f,
                 new_name.as_deref().unwrap_or(&f.name),
@@ -3392,6 +3482,16 @@ fn worlds(action: WorldsCmd, as_json: bool) -> Result<(), String> {
             let w = worlds::find(&home, &world)?;
             worlds::delete(&w)?;
             println!("{} is in the trash.", w.name);
+        }
+        WorldsCmd::Convert {
+            world,
+            mods,
+            instance,
+        } => {
+            let home = horizon_home(instance)?;
+            let log = |line: String| eprintln!("{line}");
+            let done = horizon_launcher::conversions::world(&world, mods.as_deref(), &home, &log)?;
+            print_conversion(&done, as_json);
         }
         WorldsCmd::DatapackList { world, instance } => {
             let w = worlds::find(&home(instance)?, &world)?;

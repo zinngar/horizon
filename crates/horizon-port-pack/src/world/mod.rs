@@ -43,6 +43,9 @@ pub struct Options<'a> {
     /// Where converted jars go; default `<out>-horizon-mods` beside `out`.
     pub mods_out: Option<&'a Path>,
     pub remap: Option<&'a Path>,
+    /// Mods converted already (one instance's worlds share them): used
+    /// instead of converting `mods`.
+    pub converted: Option<&'a crate::convert_mods::Converted>,
 }
 
 #[derive(Debug, Default)]
@@ -94,17 +97,25 @@ pub fn convert(o: &Options, log: Log) -> Result<Summary, String> {
 
     let mut summary = Summary::default();
     let mut provided = Provided::default();
-    if let Some(mods) = o.mods {
-        let default_out;
-        let mods_out = match o.mods_out {
-            Some(m) => m,
-            None => {
-                let name = o.out.file_name().unwrap_or_default().to_string_lossy();
-                default_out = o.out.with_file_name(format!("{name}-horizon-mods"));
-                &default_out
-            }
-        };
-        let converted = crate::convert_mods::convert(mods, mods_out, log)?;
+    let owned;
+    let converted = match (o.converted, o.mods) {
+        (Some(converted), _) => Some(converted),
+        (None, Some(mods)) => {
+            let default_out;
+            let mods_out = match o.mods_out {
+                Some(m) => m,
+                None => {
+                    let name = o.out.file_name().unwrap_or_default().to_string_lossy();
+                    default_out = o.out.with_file_name(format!("{name}-horizon-mods"));
+                    &default_out
+                }
+            };
+            owned = crate::convert_mods::convert(mods, mods_out, log)?;
+            Some(&owned)
+        }
+        (None, None) => None,
+    };
+    if let Some(converted) = converted {
         for row in &converted.rows {
             let line = format!("{}: {}. {}", row.file, row.result, row.details);
             summary.mods.push(line.trim_end_matches(". ").to_owned());
@@ -116,9 +127,9 @@ pub fn convert(o: &Options, log: Log) -> Result<Summary, String> {
                 provided.add_zip(path)?;
             }
         }
-        provided.aliases = converted.renamed;
+        provided.aliases = converted.renamed.clone();
         if !converted.installed.is_empty() {
-            summary.mods_folder = Some(mods_out.join("horizon-mods"));
+            summary.mods_folder = Some(converted.folder.clone());
         }
     }
     let remap = match o.remap {

@@ -651,5 +651,20 @@
   "Could not read the saved sign-in.": "Не вдалося прочитати збережений вхід.",
   "Could not save the renewed sign-in.": "Не вдалося зберегти оновлений вхід.",
   "The renewed sign-in could not be saved in the keychain. Unlock it and retry.": "Не вдалося зберегти оновлений вхід у в'язці ключів. Розблокуйте її та повторіть.",
-  "Another account operation is running. Try again in a moment.": "Виконується інша операція з обліковим записом. Спробуйте ще раз за мить."
+  "Another account operation is running. Try again in a moment.": "Виконується інша операція з обліковим записом. Спробуйте ще раз за мить.",
+  "Bring your Java mods and worlds to Horizon. Blocks, items, recipes and world generation carry over; what a mod does in Java code doesn't. A world's modded blocks its mods don't bring become vanilla ones. Nothing is changed where they come from.": "Перенесіть свої Java-моди та світи в Horizon. Блоки, предмети, рецепти й генерація світу переносяться; те, що мод робить у Java-коді, — ні. Модові блоки світу, яких не приносять його моди, стають ванільними. У джерелі нічого не змінюється.",
+  "Convert": "Конвертувати",
+  "From Java Edition": "З Java Edition",
+  "In your other launchers": "В інших лаунчерах",
+  "Nothing Horizon can use was found.": "Не знайдено нічого, що може використати Horizon.",
+  "{n} mod already there": "Мод уже є: {n}",
+  "{n} mod installed": "Встановлено модів: {n}",
+  "{n} mods already there": "Модів уже є: {n}",
+  "{n} mods installed": "Встановлено модів: {n}",
+  "{n} world converted": "Сконвертовано світів: {n}",
+  "{n} worlds converted": "Сконвертовано світів: {n}",
+  "Convert a mods folder…": "Конвертувати теку модів…",
+  "Convert a Java world…": "Конвертувати Java-світ…",
+  "Open reports": "Відкрити звіти",
+  "Bring to Horizon": "Перенести в Horizon"
 }

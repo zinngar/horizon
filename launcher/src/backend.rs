@@ -3066,6 +3066,10 @@ pub enum Msg {
     /// The owner gate's answer for the game about to start: the selected account's session
     /// file (none = offline) and why it plays offline, if it does.
     Session(Result<(Option<PathBuf>, Option<String>), crate::account::NoOwner>),
+    /// A conversion's line (`conversions`).
+    ConvertLine(String),
+    /// A conversion ended: what it did to the instance.
+    ConvertDone(Result<Box<crate::conversions::Done>, String>),
     /// A modpack step's line (`modpacks`).
     PackLine(String),
     /// A modpack step ended: the pack as it now is.

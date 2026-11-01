@@ -651,5 +651,20 @@
   "Could not read the saved sign-in.": "无法读取已保存的登录信息。",
   "Could not save the renewed sign-in.": "无法保存续期后的登录信息。",
   "The renewed sign-in could not be saved in the keychain. Unlock it and retry.": "无法将续期后的登录信息保存到钥匙串。请解锁后重试。",
-  "Another account operation is running. Try again in a moment.": "另一个账户操作正在进行。请稍后重试。"
+  "Another account operation is running. Try again in a moment.": "另一个账户操作正在进行。请稍后重试。",
+  "Bring your Java mods and worlds to Horizon. Blocks, items, recipes and world generation carry over; what a mod does in Java code doesn't. A world's modded blocks its mods don't bring become vanilla ones. Nothing is changed where they come from.": "把你的 Java 模组和世界带到 Horizon。方块、物品、配方和世界生成会保留;模组用 Java 代码实现的部分不会。世界中其模组未带来的模组方块会变成原版方块。来源处不会做任何更改。",
+  "Convert": "转换",
+  "From Java Edition": "来自 Java 版",
+  "In your other launchers": "在你的其他启动器中",
+  "Nothing Horizon can use was found.": "没有找到 Horizon 能用的内容。",
+  "{n} mod already there": "已有模组:{n}",
+  "{n} mod installed": "已安装模组:{n}",
+  "{n} mods already there": "已有模组:{n}",
+  "{n} mods installed": "已安装模组:{n}",
+  "{n} world converted": "已转换世界:{n}",
+  "{n} worlds converted": "已转换世界:{n}",
+  "Convert a mods folder…": "转换模组文件夹…",
+  "Convert a Java world…": "转换 Java 世界…",
+  "Open reports": "打开报告",
+  "Bring to Horizon": "带到 Horizon"
 }

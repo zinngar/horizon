@@ -540,6 +540,18 @@ List the instances other launchers keep (Prism Launcher, MultiMC, the official l
 
 MCP: `instance_others`.
 
+## `horizon-launcher instance bring`
+
+Bring another launcher's instance to a Horizon instance: its mods converted and turned on, each of its worlds converted into a new world (docs/mod-convert.md, docs/world-convert.md); the other launcher's copy stays as it is.
+
+    horizon-launcher instance bring <NAME>
+
+- `NAME`: Its name, as `instance others` lists it
+- `--folder`: Look in this folder instead: a launcher's folder, its instances/ or one instance
+- `--into`: The Horizon instance it goes into (default: the selected one)
+
+MCP: `instance_bring`.
+
 ## `horizon-launcher instance copy-from`
 
 Copy another launcher's instance into a new Java instance: its Minecraft version and its game folder (worlds, mods, packs, options); the other launcher's copy stays as it is.
@@ -595,6 +607,18 @@ Move a world to the system's trash.
 - `--instance`
 
 MCP: `worlds_delete`, needs `confirm: true`.
+
+## `horizon-launcher worlds convert`
+
+Convert a Java world into a new world of a Horizon instance: modded blocks, items and biomes kept when their mod converts, else remapped or removed (docs/world-convert.md).
+
+    horizon-launcher worlds convert <WORLD>
+
+- `WORLD`: The world's folder (the one holding level.dat)
+- `--mods`: The mods folder it was played with: converted and turned on first
+- `--instance`
+
+MCP: `worlds_convert`.
 
 ## `horizon-launcher worlds datapack-list`
 
@@ -819,6 +843,17 @@ What the browser installed in an instance (the default).
 - `--instance`: The instance (default: the selected one)
 
 MCP: `mods_list`.
+
+## `horizon-launcher mods convert`
+
+Convert a folder of Java mod jars (a launcher's mods/) and turn on what runs in Horizon (docs/mod-convert.md).
+
+    horizon-launcher mods convert <FOLDER>
+
+- `FOLDER`
+- `--instance`: The Horizon instance (default: the selected one)
+
+MCP: `mods_convert`.
 
 ## `horizon-launcher mods search`
 

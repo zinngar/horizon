@@ -11,6 +11,7 @@ mod cli_tools;
 mod collection;
 mod console;
 mod console_page;
+mod convert_page;
 mod cull;
 mod datapacks_page;
 mod dev_options;
@@ -337,6 +338,7 @@ struct Launcher {
     pack_filter: Option<horizon_port_pack::report::Status>,
     pack_busy: bool,
     pack_log: VecDeque<String>,
+    convert: convert_page::Convert,
     pack_error: Option<String>,
     /// The game starting now plays this pack's profile (its work folder).
     starting_pack: Option<std::path::PathBuf>,
@@ -556,6 +558,7 @@ impl Launcher {
             pack_filter: None,
             pack_busy: false,
             pack_log: VecDeque::new(),
+            convert: convert_page::Convert::default(),
             pack_error: None,
             starting_pack: None,
             mods: mods_page::Mods::new(cx),
@@ -1081,6 +1084,8 @@ impl Launcher {
                     }
                 }
                 Msg::PackDone(result) => self.pack_done(result),
+                Msg::ConvertLine(line) => self.convert_line(line),
+                Msg::ConvertDone(result) => self.convert_done(result),
                 // Old versions log their session; it never reaches the window.
                 Msg::Line(_, line) if line.contains("Session ID is") => {}
                 Msg::Line(job, line) => {

@@ -34,6 +34,8 @@ pub struct Converted {
     pub installed: Vec<PathBuf>,
     /// Dashed mod ids and what they became: worlds name their ids the old way.
     pub renamed: BTreeMap<String, String>,
+    /// `<out>/horizon-mods/`: what to copy into the game folder's.
+    pub folder: PathBuf,
 }
 
 pub fn convert(dir: &Path, out: &Path, log: Log) -> Result<Converted, String> {
@@ -51,7 +53,10 @@ pub fn convert(dir: &Path, out: &Path, log: Log) -> Result<Converted, String> {
     fs::create_dir_all(&mods).map_err(|e| at(&mods, e))?;
     let known = Known::atm10();
     let manifest = horizon_mods::manifest::MANIFEST;
-    let mut converted = Converted::default();
+    let mut converted = Converted {
+        folder: mods.clone(),
+        ..Converted::default()
+    };
     // (row index, folder mod) in the order the game would meet them.
     let mut folders: Vec<(usize, PathBuf)> = Vec::new();
     for path in entries {

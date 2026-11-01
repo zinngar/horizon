@@ -651,5 +651,20 @@
   "Could not read the saved sign-in.": "保存されたサインイン情報を読み込めませんでした。",
   "Could not save the renewed sign-in.": "更新したサインイン情報を保存できませんでした。",
   "The renewed sign-in could not be saved in the keychain. Unlock it and retry.": "更新したサインイン情報をキーチェーンに保存できませんでした。ロックを解除して再試行してください。",
-  "Another account operation is running. Try again in a moment.": "別のアカウント操作を実行中です。しばらくしてからもう一度お試しください。"
+  "Another account operation is running. Try again in a moment.": "別のアカウント操作を実行中です。しばらくしてからもう一度お試しください。",
+  "Bring your Java mods and worlds to Horizon. Blocks, items, recipes and world generation carry over; what a mod does in Java code doesn't. A world's modded blocks its mods don't bring become vanilla ones. Nothing is changed where they come from.": "Java の Mod とワールドを Horizon に持ってきます。ブロック、アイテム、レシピ、ワールド生成は引き継がれますが、Mod が Java コードで行うことは引き継がれません。Mod が持ち込まないワールド内の Mod ブロックはバニラのブロックになります。元のファイルは何も変更されません。",
+  "Convert": "変換",
+  "From Java Edition": "Java Edition から",
+  "In your other launchers": "ほかのランチャー",
+  "Nothing Horizon can use was found.": "Horizon で使えるものは見つかりませんでした。",
+  "{n} mod already there": "既にある Mod: {n}",
+  "{n} mod installed": "インストールした Mod: {n}",
+  "{n} mods already there": "既にある Mod: {n}",
+  "{n} mods installed": "インストールした Mod: {n}",
+  "{n} world converted": "変換したワールド: {n}",
+  "{n} worlds converted": "変換したワールド: {n}",
+  "Convert a mods folder…": "Mod フォルダーを変換…",
+  "Convert a Java world…": "Java のワールドを変換…",
+  "Open reports": "レポートを開く",
+  "Bring to Horizon": "Horizon に持ってくる"
 }

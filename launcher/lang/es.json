@@ -651,5 +651,20 @@
   "Could not read the saved sign-in.": "No se pudo leer el inicio de sesión guardado.",
   "Could not save the renewed sign-in.": "No se pudo guardar el inicio de sesión renovado.",
   "The renewed sign-in could not be saved in the keychain. Unlock it and retry.": "No se pudo guardar el inicio de sesión renovado en el llavero. Desbloquéalo y vuelve a intentarlo.",
-  "Another account operation is running. Try again in a moment.": "Hay otra operación de cuenta en curso. Vuelve a intentarlo en un momento."
+  "Another account operation is running. Try again in a moment.": "Hay otra operación de cuenta en curso. Vuelve a intentarlo en un momento.",
+  "Bring your Java mods and worlds to Horizon. Blocks, items, recipes and world generation carry over; what a mod does in Java code doesn't. A world's modded blocks its mods don't bring become vanilla ones. Nothing is changed where they come from.": "Trae tus mods y mundos de Java a Horizon. Los bloques, objetos, recetas y la generación del mundo se conservan; lo que un mod hace en código Java, no. Los bloques modificados de un mundo que sus mods no traen se vuelven vanilla. No se cambia nada en el origen.",
+  "Convert": "Convertir",
+  "From Java Edition": "Desde Java Edition",
+  "In your other launchers": "En tus otros launchers",
+  "Nothing Horizon can use was found.": "No se encontró nada que Horizon pueda usar.",
+  "{n} mod already there": "{n} mod ya estaba",
+  "{n} mod installed": "{n} mod instalado",
+  "{n} mods already there": "{n} mods ya estaban",
+  "{n} mods installed": "{n} mods instalados",
+  "{n} world converted": "{n} mundo convertido",
+  "{n} worlds converted": "{n} mundos convertidos",
+  "Convert a mods folder…": "Convertir una carpeta de mods…",
+  "Convert a Java world…": "Convertir un mundo de Java…",
+  "Open reports": "Abrir informes",
+  "Bring to Horizon": "Traer a Horizon"
 }

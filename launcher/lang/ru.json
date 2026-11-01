@@ -651,5 +651,20 @@
   "Could not read the saved sign-in.": "Не удалось прочитать сохранённый вход.",
   "Could not save the renewed sign-in.": "Не удалось сохранить обновлённый вход.",
   "The renewed sign-in could not be saved in the keychain. Unlock it and retry.": "Не удалось сохранить обновлённый вход в связке ключей. Разблокируйте её и повторите.",
-  "Another account operation is running. Try again in a moment.": "Выполняется другая операция с аккаунтом. Повторите через минуту."
+  "Another account operation is running. Try again in a moment.": "Выполняется другая операция с аккаунтом. Повторите через минуту.",
+  "Bring your Java mods and worlds to Horizon. Blocks, items, recipes and world generation carry over; what a mod does in Java code doesn't. A world's modded blocks its mods don't bring become vanilla ones. Nothing is changed where they come from.": "Перенесите свои Java-моды и миры в Horizon. Блоки, предметы, рецепты и генерация мира переносятся; то, что мод делает в Java-коде, — нет. Модовые блоки мира, которые не приносят его моды, становятся ванильными. В источнике ничего не меняется.",
+  "Convert": "Конвертировать",
+  "From Java Edition": "Из Java Edition",
+  "In your other launchers": "В других лаунчерах",
+  "Nothing Horizon can use was found.": "Не найдено ничего, что может использовать Horizon.",
+  "{n} mod already there": "Мод уже есть: {n}",
+  "{n} mod installed": "Установлено модов: {n}",
+  "{n} mods already there": "Модов уже есть: {n}",
+  "{n} mods installed": "Установлено модов: {n}",
+  "{n} world converted": "Сконвертировано миров: {n}",
+  "{n} worlds converted": "Сконвертировано миров: {n}",
+  "Convert a mods folder…": "Конвертировать папку модов…",
+  "Convert a Java world…": "Конвертировать Java-мир…",
+  "Open reports": "Открыть отчёты",
+  "Bring to Horizon": "Перенести в Horizon"
 }
