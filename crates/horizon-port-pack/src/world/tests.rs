@@ -435,3 +435,59 @@ fn refuses_forge_worlds_from_before_the_flattening() {
     assert!(e.contains("before Minecraft 1.13"), "{e}");
     fs::remove_dir_all(dir).unwrap();
 }
+
+#[test]
+fn ids_of_a_renamed_mod_take_its_new_namespace() {
+    let mut provided = Provided::default();
+    provided.aliases.insert("gem-mod".into(), "gem_mod".into());
+    provided.blocks.insert("gem_mod:ruby_block".into());
+    provided.items.insert("gem_mod:ruby".into());
+    let mut tag = Tag::compound([
+        (
+            "sections",
+            Tag::List(vec![Tag::compound([(
+                "block_states",
+                Tag::compound([(
+                    "palette",
+                    Tag::List(vec![Tag::compound([("Name", s("gem-mod:ruby_block"))])]),
+                )]),
+            )])]),
+        ),
+        (
+            "block_entities",
+            Tag::List(vec![Tag::compound([
+                ("id", s("minecraft:chest")),
+                (
+                    "Items",
+                    Tag::List(vec![Tag::compound([
+                        ("id", s("gem-mod:ruby")),
+                        ("count", Tag::Int(2)),
+                    ])]),
+                ),
+            ])]),
+        ),
+    ]);
+    let (changed, ledger) = run(&mut tag, &provided, &Remap::default());
+    assert!(changed);
+    let Some(Tag::List(sections)) = tag.get("sections") else {
+        panic!()
+    };
+    let Some(Tag::List(palette)) = sections[0]
+        .get("block_states")
+        .and_then(|b| b.get("palette"))
+    else {
+        panic!()
+    };
+    assert_eq!(name(&palette[0]), "gem_mod:ruby_block");
+    let Some(Tag::List(entities)) = tag.get("block_entities") else {
+        panic!()
+    };
+    let Some(Tag::List(items)) = entities[0].get("Items") else {
+        panic!()
+    };
+    assert_eq!(name(&items[0]), "gem_mod:ruby");
+    assert_eq!(
+        ledger[&(Kind::Block, "gem_mod:ruby_block".into())].became,
+        "kept"
+    );
+}

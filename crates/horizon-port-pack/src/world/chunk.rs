@@ -61,6 +61,19 @@ impl Ctx<'_> {
     }
 }
 
+/// An id in a string tag set to its renamed namespace's: the id it holds
+/// now, and whether it changed.
+fn renamed(tag: &mut Tag, cx: &Ctx) -> Option<(String, bool)> {
+    let id = string(Some(&*tag))?;
+    match cx.provided.rename(&id) {
+        Some(new) => {
+            *tag = Tag::String(new.as_str().into());
+            Some((new, true))
+        }
+        None => Some((id, false)),
+    }
+}
+
 fn key(name: &str) -> JavaString {
     JavaString::from(name)
 }
@@ -127,9 +140,10 @@ pub fn chunk(root: &mut Tag, cx: &mut Ctx) -> bool {
             }
             if let Some(biomes) = compound(section, "biomes").and_then(|s| list(s, "palette")) {
                 for biome in biomes {
-                    let Some(id) = string(Some(&*biome)) else {
+                    let Some((id, r)) = renamed(biome, cx) else {
                         continue;
                     };
+                    changed |= r;
                     if !cx.keeps(Kind::Biome, &id) {
                         let to = cx.remap.biome(&full(&id), cx.biome);
                         cx.note(Kind::Biome, &id, to.clone());
@@ -166,12 +180,19 @@ pub fn chunk(root: &mut Tag, cx: &mut Ctx) -> bool {
     ] {
         if let Some(ticks) = list(level, ticks) {
             let before = ticks.len();
-            ticks.retain(|t| match string(t.get("i")) {
-                Some(id) if !cx.provided.keeps(Kind::Block, &id) => {
-                    cx.note(Kind::Tick, &id, "removed");
-                    false
+            ticks.retain_mut(|t| {
+                let id = t.get_mut("i").and_then(|i| renamed(i, cx));
+                match id {
+                    Some((id, _)) if !cx.provided.keeps(Kind::Block, &id) => {
+                        cx.note(Kind::Tick, &id, "removed");
+                        false
+                    }
+                    Some((_, r)) => {
+                        changed |= r;
+                        true
+                    }
+                    None => true,
                 }
-                _ => true,
             });
             changed |= ticks.len() != before;
         }
@@ -179,6 +200,16 @@ pub fn chunk(root: &mut Tag, cx: &mut Ctx) -> bool {
     if let Some(structures) = compound(level, names("structures", "Structures")) {
         for part in ["starts", "Starts", "References"] {
             if let Some(map) = compound(structures, part) {
+                let renames: Vec<_> = map
+                    .keys()
+                    .filter_map(|k| Some((k.clone(), cx.provided.rename(&k.to_string_lossy())?)))
+                    .collect();
+                for (old, new) in renames {
+                    if let Some(v) = map.remove(&old) {
+                        map.insert(key(&new), v);
+                        changed = true;
+                    }
+                }
                 let before = map.len();
                 map.retain(|id, _| {
                     let id = id.to_string_lossy();
@@ -206,11 +237,11 @@ fn block_state(entry: &mut Tag, cx: &mut Ctx) -> bool {
     let Tag::Compound(map) = entry else {
         return false;
     };
-    let Some(id) = string(map.get(&key("Name"))) else {
+    let Some((id, r)) = map.get_mut(&key("Name")).and_then(|n| renamed(n, cx)) else {
         return false;
     };
     if cx.keeps(Kind::Block, &id) {
-        return false;
+        return r;
     }
     let from: BTreeMap<String, String> = match map.get(&key("Properties")) {
         Some(Tag::Compound(p)) => p
@@ -339,11 +370,14 @@ const MISSING: &str = "horizon_missing";
 
 /// One item stack: `None` when it was replaced, else whether it changed.
 fn stack(map: &mut Compound, cx: &mut Ctx) -> Option<bool> {
-    let id = string(map.get(&key("id"))).unwrap_or_default();
+    let (id, r) = map
+        .get_mut(&key("id"))
+        .and_then(|i| renamed(i, cx))
+        .unwrap_or_default();
     if cx.keeps(Kind::Item, &id) {
         // A kept item loses the components of mods that aren't.
         let Some(components) = compound(map, "components") else {
-            return Some(false);
+            return Some(r);
         };
         let before = components.len();
         components.retain(|k, _| {
@@ -351,7 +385,7 @@ fn stack(map: &mut Compound, cx: &mut Ctx) -> Option<bool> {
             cx.provided.keeps(Kind::Item, k.trim_start_matches('!'))
                 || namespace(k.trim_start_matches('!')) == "minecraft"
         });
-        return Some(components.len() != before);
+        return Some(r || components.len() != before);
     }
     let original = Tag::Compound(map.clone());
     let count = map

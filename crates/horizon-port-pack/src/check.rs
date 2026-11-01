@@ -53,6 +53,12 @@ pub struct Check {
     /// not share one.
     pub namespaces: Vec<String>,
     pub code: classes::Code,
+    /// A dashed mod id, carried over as `mod_id` ([`crate::prepare`]).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub renamed_from: Option<String>,
+    /// Made for 1.20 or older, its data upgraded ([`crate::prepare`]).
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub upgraded: bool,
 }
 
 /// The loader a jar is made for, from its metadata file.
@@ -71,19 +77,6 @@ fn loader(names: &[String]) -> &'static str {
     }
 }
 
-/// Data folders named as before 1.21 (`recipes/`, `loot_tables/`) and none
-/// as 1.21 names them: the game doesn't read them, and the carry upgrades
-/// from 1.21.1 on. (Some jars keep a stale plural folder beside the new one.)
-fn old_layout(names: &[String]) -> bool {
-    let has = |kinds: [&str; 2]| {
-        names.iter().any(|n| {
-            let p: Vec<&str> = n.split('/').collect();
-            p.len() > 3 && p[0] == "data" && kinds.contains(&p[2]) && n.ends_with(".json")
-        })
-    };
-    has(["recipes", "loot_tables"]) && !has(["recipe", "loot_table"])
-}
-
 fn plural(n: usize, one: &str, many: &str) -> String {
     format!("{n} {}", if n == 1 { one } else { many })
 }
@@ -92,6 +85,8 @@ fn plural(n: usize, one: &str, many: &str) -> String {
 /// `out/carry-report.json` beside it). The carry is the folder mod an
 /// install copies.
 pub fn check(jar_path: &Path, out: &Path) -> Result<Check, String> {
+    let prepared = crate::prepare::prepare(jar_path, out)?;
+    let jar_path = prepared.jar.as_path();
     let info = jar::read(jar_path)?;
     let file = fs::File::open(jar_path).map_err(|e| format!("{}: {e}", jar_path.display()))?;
     let mut zip = zip::ZipArchive::new(file).map_err(|e| format!("{}: {e}", jar_path.display()))?;
@@ -124,18 +119,14 @@ pub fn check(jar_path: &Path, out: &Path) -> Result<Check, String> {
         depends: info.depends.clone(),
         namespaces: Vec::new(),
         code,
+        renamed_from: prepared.renamed.map(|(old, _)| old),
+        upgraded: prepared.upgraded,
     };
     fs::create_dir_all(out).map_err(|e| format!("{}: {e}", out.display()))?;
     let done = |check: Check| -> Result<Check, String> {
         crate::pipeline::write_json(&out.join("check.json"), &check)?;
         Ok(check)
     };
-    if old_layout(&names) {
-        check.summary = "Made for Minecraft 1.20 or older: Horizon ports mods made for 1.21 \
-                         and later."
-            .into();
-        return done(check);
-    }
     let alone = |m: &str| m == info.mod_id || m == "minecraft";
     let pack = carry::Pack {
         loaded: &alone,
@@ -274,6 +265,19 @@ pub fn check(jar_path: &Path, out: &Path) -> Result<Check, String> {
             ),
         )
     };
+    if check.verdict != Verdict::No {
+        if check.upgraded {
+            check
+                .ports
+                .push("data made for Minecraft 1.20 or older, upgraded".into());
+        }
+        if let Some(old) = &check.renamed_from {
+            check.ports.push(format!(
+                "id {old} renamed {} (Horizon ids have no dashes)",
+                check.mod_id
+            ));
+        }
+    }
     done(check)
 }
 
@@ -381,7 +385,7 @@ displayName = "Ruby"
     }
 
     #[test]
-    fn code_only_and_old_layouts_dont_run() {
+    fn code_only_doesnt_run() {
         let dir = temp("code");
         let tile = crate::classes::tests_support::class_file("ruby/Mixin", "java/lang/Object");
         let c = check(
@@ -397,19 +401,49 @@ displayName = "Ruby"
         .unwrap();
         assert_eq!(c.verdict, Verdict::No);
         assert!(c.summary.starts_with("Nothing to port"), "{}", c.summary);
-        let c = check(
-            &jar(
-                &dir,
-                &[
-                    ("META-INF/mods.toml", TOML),
-                    ("data/ruby/recipes/ruby.json", b"{}"),
-                ],
+        fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn old_and_dashed_mods_are_carried_over() {
+        let dir = temp("old");
+        let blockstate = br#"{"variants": {"": {"model": "ruby:block/ruby_block"}}}"#;
+        let recipe = br#"{"type": "minecraft:crafting_shapeless", "ingredients": [{"item": "minecraft:red_dye"}], "result": {"item": "ruby:ruby_block"}}"#;
+        let files = [
+            ("META-INF/mods.toml", TOML),
+            (
+                "assets/ruby/blockstates/ruby_block.json",
+                blockstate.as_slice(),
             ),
-            &dir.join("out"),
-        )
-        .unwrap();
-        assert_eq!(c.verdict, Verdict::No);
-        assert!(c.summary.contains("1.20 or older"));
+            ("data/ruby/recipes/ruby_block.json", recipe.as_slice()),
+        ];
+        let c = check(&jar(&dir, &files), &dir.join("out")).unwrap();
+        assert_eq!(c.verdict, Verdict::Works, "{c:?}");
+        assert!(c.upgraded);
+        let carried =
+            fs::read_to_string(dir.join("out/carry/data/ruby/recipe/ruby_block.json")).unwrap();
+        let carried: serde_json::Value = serde_json::from_str(&carried).unwrap();
+        assert_eq!(carried["result"]["id"], "ruby:ruby_block");
+
+        let fabric = br#"{"id": "ruby-gems", "name": "Ruby", "version": "1"}"#;
+        let blockstate = br#"{"variants": {"": {"model": "ruby-gems:block/ruby_block"}}}"#;
+        let files = [
+            ("fabric.mod.json", fabric.as_slice()),
+            (
+                "assets/ruby-gems/blockstates/ruby_block.json",
+                blockstate.as_slice(),
+            ),
+        ];
+        let c = check(&jar(&dir, &files), &dir.join("dashed")).unwrap();
+        assert_eq!(c.verdict, Verdict::Works, "{c:?}");
+        assert_eq!(
+            (c.mod_id.as_str(), c.renamed_from.as_deref()),
+            ("ruby_gems", Some("ruby-gems"))
+        );
+        assert!(
+            dir.join("dashed/carry/data/ruby_gems/horizon/block/ruby_block.json")
+                .is_file()
+        );
         fs::remove_dir_all(&dir).unwrap();
     }
 }

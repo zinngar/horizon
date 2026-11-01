@@ -37,6 +37,9 @@ pub struct Provided {
     pub biomes: BTreeSet<String>,
     pub structures: BTreeSet<String>,
     pub dimensions: BTreeSet<String>,
+    /// Dashed namespaces and the ones their mods were converted under
+    /// (`gem-mod` to `gem_mod`, [`crate::prepare`]).
+    pub aliases: BTreeMap<String, String>,
 }
 
 impl Provided {
@@ -110,6 +113,12 @@ impl Provided {
         } else if let Some(path) = rest.strip_prefix("dimension/") {
             self.dimensions.insert(id(path));
         }
+    }
+
+    /// `id` in the namespace its mod was converted under, when renamed.
+    pub fn rename(&self, id: &str) -> Option<String> {
+        let (ns, path) = id.split_once(':')?;
+        self.aliases.get(ns).map(|new| format!("{new}:{path}"))
     }
 
     pub fn keeps(&self, kind: Kind, id: &str) -> bool {

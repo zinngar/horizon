@@ -10,11 +10,11 @@ cargo run --release -p horizon-port-pack -- convert-world \
   ~/.minecraft/saves/MyWorld "~/Desktop/MyWorld (Horizon)" --mods ~/.minecraft/mods
 ```
 
-1. **Mods.** Each jar in `--mods` is converted as the mod browser converts one (`check`: its blocks,
-   items, recipes, loot, tags, worldgen and assets, into a folder mod) under `--mods-out` (default
-   `<out>-horizon-mods`). `.hmod` files and folder mods there are Horizon mods already. Whatever these
-   mods add stays in the world: install their `carry` folders into the game folder's `mods/` and turn
-   them on before opening it.
+1. **Mods.** The folder in `--mods` is converted with [`convert-mods`](mod-convert.md) into
+   `--mods-out` (default `<out>-horizon-mods`). Whatever the converted mods add stays in the world:
+   copy `<mods-out>/horizon-mods/` into the game folder's `horizon-mods/` and turn them on before
+   opening it. A mod whose dashed id was renamed (`gem-mod` to `gem_mod`) has its ids renamed in the
+   world too.
 2. **Every other modded id** is decided by kind:
 
    | In the world | Becomes |

@@ -29,6 +29,10 @@
 //!   (zip or folder) with its world generation rewritten in 26.3's formats
 //!   (`docs/datapack-upgrade.md`), into the folder `<out>`, or into
 //!   `<world>/datapacks/<pack name>-26.3`.
+//! - `convert-mods <mods folder> <out>`: every jar of a launcher's mods
+//!   folder checked and carried over, the ones with content into
+//!   `<out>/horizon-mods/` ready to install, and `<out>/convert-mods-report.md`
+//!   (`docs/mod-convert.md`).
 //! - `convert-world <world> <out> [--mods <folder>] [--mods-out <folder>]
 //!   [--remap <toml>]`: a Java world played with mods, copied to `<out>` so
 //!   it opens in Horizon: the mods in `<folder>` converted, and every
@@ -42,7 +46,7 @@ use std::{
     process::ExitCode,
 };
 
-const USAGE: &str = "usage: horizon-port-pack import <pack> <work> | inventory <work> [--offline] | fetch <work> [--from <folder>] [<mod id>...] | carry <work> [--resources <prepared>] [<mod id>...] | report <work> | check <jar> <out> | port <pack> <work> [--from <folder>] [--resources <prepared>] | upgrade-datapack <pack> (<out> | --world <world>) | convert-world <world> <out> [--mods <folder>] [--mods-out <folder>] [--remap <toml>]";
+const USAGE: &str = "usage: horizon-port-pack import <pack> <work> | inventory <work> [--offline] | fetch <work> [--from <folder>] [<mod id>...] | carry <work> [--resources <prepared>] [<mod id>...] | report <work> | check <jar> <out> | port <pack> <work> [--from <folder>] [--resources <prepared>] | upgrade-datapack <pack> (<out> | --world <world>) | convert-mods <mods folder> <out> | convert-world <world> <out> [--mods <folder>] [--mods-out <folder>] [--remap <toml>]";
 
 fn main() -> ExitCode {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
@@ -115,6 +119,18 @@ fn main() -> ExitCode {
                     println!("{line}");
                 }
                 println!("{}", out.display());
+                Ok(())
+            }
+            Some("convert-mods") => {
+                let out = path(2)?;
+                let c = horizon_port_pack::convert_mods::convert(path(1)?, out, log)?;
+                println!(
+                    "{} of {} installable: {}",
+                    c.installed.len(),
+                    c.rows.len(),
+                    out.join("horizon-mods").display()
+                );
+                println!("{}", out.join("convert-mods-report.md").display());
                 Ok(())
             }
             Some("convert-world") => {

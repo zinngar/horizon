@@ -300,7 +300,7 @@ fn java_mods_are_ported_turned_on_refused_on_clashes_and_removed() {
     );
     // The jar isn't kept, its check is.
     assert!(!home
-        .join("mod-browser/checks-1/.downloads/ruby-1.zip")
+        .join("mod-browser/checks-2/.downloads/ruby-1.zip")
         .exists());
 
     let clash = install(&fake, &fake.project("gem").unwrap(), false, &home, NONE).unwrap_err();

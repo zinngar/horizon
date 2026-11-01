@@ -14,7 +14,7 @@ use std::path::{Path, PathBuf};
 
 /// Where the checks are kept, under the game folder. Its name changes when the check finds
 /// more, so older answers are checked again.
-const CHECKS: &str = "mod-browser/checks-1";
+const CHECKS: &str = "mod-browser/checks-2";
 /// The game's mod folder and on-list, beside `options.txt` (`horizon_client::mod_list`).
 pub const MODS_DIR: &str = "horizon-mods";
 const MODS_LIST: &str = "horizon-mods.txt";

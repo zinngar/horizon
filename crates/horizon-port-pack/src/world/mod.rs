@@ -104,9 +104,21 @@ pub fn convert(o: &Options, log: Log) -> Result<Summary, String> {
                 &default_out
             }
         };
-        let converted = convert_mods(mods, mods_out, &mut provided, &mut summary.mods, log)?;
-        if converted {
-            summary.mods_folder = Some(mods_out.to_path_buf());
+        let converted = crate::convert_mods::convert(mods, mods_out, log)?;
+        for row in &converted.rows {
+            let line = format!("{}: {}. {}", row.file, row.result, row.details);
+            summary.mods.push(line.trim_end_matches(". ").to_owned());
+        }
+        for path in &converted.installed {
+            if path.is_dir() {
+                provided.add_folder(path)?;
+            } else {
+                provided.add_zip(path)?;
+            }
+        }
+        provided.aliases = converted.renamed;
+        if !converted.installed.is_empty() {
+            summary.mods_folder = Some(mods_out.join("horizon-mods"));
         }
     }
     let remap = match o.remap {
@@ -195,64 +207,6 @@ pub fn convert(o: &Options, log: Log) -> Result<Summary, String> {
     )
     .map_err(|e| e.to_string())?;
     Ok(summary)
-}
-
-/// Converts each jar into `out/<jar name>/` and reads what every mod in
-/// `dir` provides. Returns whether any jar was converted.
-fn convert_mods(
-    dir: &Path,
-    out: &Path,
-    provided: &mut Provided,
-    lines: &mut Vec<String>,
-    log: Log,
-) -> Result<bool, String> {
-    let mut entries: Vec<PathBuf> = fs::read_dir(dir)
-        .map_err(|e| format!("{}: {e}", dir.display()))?
-        .flatten()
-        .map(|e| e.path())
-        .collect();
-    entries.sort();
-    let mut folders = Vec::new();
-    let mut zips = Vec::new();
-    let mut converted = false;
-    for path in entries {
-        let name = path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .into_owned();
-        let manifest = horizon_mods::manifest::MANIFEST;
-        if name.ends_with(".jar") {
-            let dest = out.join(path.file_stem().unwrap_or_default());
-            match crate::check::check(&path, &dest) {
-                Ok(c) => {
-                    let line = format!("{name}: {}. {}", c.verdict.label(), c.summary);
-                    log(line.clone());
-                    lines.push(line);
-                    if dest.join("carry").join(manifest).is_file() {
-                        folders.push(dest.join("carry"));
-                        converted = true;
-                    }
-                }
-                Err(e) => lines.push(format!("{name}: not converted: {e}")),
-            }
-        } else if path.join(manifest).is_file() {
-            lines.push(format!("{name}: a Horizon mod already"));
-            folders.push(path);
-        } else if name.ends_with(".hmod") {
-            lines.push(format!("{name}: a Horizon mod already"));
-            zips.push(path);
-        }
-    }
-    let (on, off) = crate::pipeline::loadable(&folders);
-    lines.extend(off);
-    for folder in on {
-        provided.add_folder(&folder)?;
-    }
-    for zip in zips {
-        provided.add_zip(&zip)?;
-    }
-    Ok(converted)
 }
 
 /// The dimension a world file belongs to, when it is a modded one that goes:
@@ -390,8 +344,8 @@ fn report(o: &Options, data_version: i32, s: &Summary) -> String {
         if let Some(folder) = &s.mods_folder {
             let _ = writeln!(
                 out,
-                "\nInstall the converted mods before you open the world: copy each `carry` folder \
-                 in `{}` into the game folder's `mods/`, then turn them on in Mods.",
+                "\nInstall the converted mods before you open the world: copy everything in `{}` \
+                 into the game folder's `horizon-mods/` (beside `options.txt`), then turn them on in Options > Mods.",
                 folder.display()
             );
         }

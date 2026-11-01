@@ -42,8 +42,9 @@ its answer comes.
 - **Partly**: the content ports; the row lists what doesn't: blocks with no vanilla block to copy, recipes of the
   mod's own types, block entities (machines, containers), menus, mobs and entities, blocks and items with behaviour
   of their own, worldgen written in Java, Mixins, the game events it reacts to.
-- **Doesn't run**: nothing to port (performance mods, libraries, everything in code), a jar made for 1.20 or older,
-  or a mod id with characters Horizon mods can't use (`fabric-api`). Never offered for install.
+- **Doesn't run**: nothing to port (performance mods, libraries, everything in code). Never offered for install.
+  Jars made for 1.20 or older and mod ids with dashes (`cloth-config`) are upgraded or renamed first
+  ([mod-convert.md](mod-convert.md)).
 
 The answer is kept in `mod-browser/checks-1/<checksum>/` under the game folder, with the carry when something
 ports; the jar itself isn't kept. A file is checked once. On ten 26.3 jars a check took 0.2 to 3 s (24 s for an

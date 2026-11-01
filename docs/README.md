@@ -23,6 +23,7 @@ To play, use [the launcher](../launcher/README.md); the project site is [playhor
 - [Shader packs](shaders.md): Horizon's own WGSL shader packs, how to make and check one (`horizon-shader`).
 - [Mods](mods.md): content mods (data) and native mods (Rust), how to make, install and publish them. [Native mods](native-mods.md): how the launcher builds them. [Native hook points modelled on NeoForge](native-hooks-neoforge.md): the proposal for new hooks.
 - [Upgrading a 26.2 data pack](datapack-upgrade.md): `horizon-port-pack upgrade-datapack` rewrites a 26.2 worldgen pack in 26.3's formats, and how the rewrite is checked against vanilla.
+- [Converting a folder of Java mods](mod-convert.md): `horizon-port-pack convert-mods` turns a launcher's mods folder into Horizon mods ready to install, including jars made for 1.20 or older and mod ids with dashes; what Java code did is left out, and the report says what.
 - [Converting a modded Java world](world-convert.md): `horizon-port-pack convert-world` copies a world played with Forge, NeoForge or Fabric mods into one Horizon opens: the mods converted, every other modded id remapped or removed, and a report.
 - [Modpacks](modpacks.md): porting whole packs (ATM10 and smaller): import, inventory, carry-over, an agent per mod with a harness against the Java original, coverage, and how "10x" is measured.
 - [Launcher](../launcher/README.md): installs, updates and starts builds; its CLI and MCP server; releasing it.
